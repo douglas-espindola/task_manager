@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
+use App\Filament\Resources\TaskGroupResource\Pages;
+use App\Filament\Resources\TaskGroupResource\RelationManagers;
+use App\Models\TaskGroup;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -12,35 +12,28 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Filters\TernaryFilter;
 
-
-class UserResource extends Resource
+class TaskGroupResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = TaskGroup::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark';
 
     protected static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('is_admin', true)->count();
+        return static::getModel()::count();
     }
 
-    protected static ?string $navigationGroup = 'Administration';
+    protected static ?string $navigationGroup = 'Task';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('title')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('is_admin')
-                    ->required(),
+                Forms\Components\Textarea::make('description'),
             ]);
     }
 
@@ -48,24 +41,24 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('title')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('email')
+                Tables\Columns\TextColumn::make('description')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(30),
 
-                Tables\Columns\ToggleColumn::make('is_admin'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('d/m/y H:i'),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime('d/m/y H:i'),
             ])
             ->filters([
-                TernaryFilter::make('is_admin')
+                //
             ])
-
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -78,7 +71,7 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageUsers::route('/'),
+            'index' => Pages\ManageTaskGroups::route('/'),
         ];
     }
 }
